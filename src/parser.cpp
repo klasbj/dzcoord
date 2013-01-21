@@ -41,6 +41,24 @@ static string LINE_WORDS[LINE_LAST] = {
   "text"
 };
 
+static inline bool iscmd(char ch) {
+  return (
+      ch == '^'   ||
+      ch == '#'   ||
+      ch == '|'   ||
+      false
+      );
+}
+
+static inline bool istext(char ch) {
+  return !(
+      ch == '\n'  ||
+      ch == '\0'  ||
+      iscmd(ch)   ||
+      false
+      );
+}
+
 /*
  * Parses string and executes what is necessary to alter the areas struct.
  */
@@ -162,8 +180,7 @@ int parse_new_text(const char *& str, string & id, size_t & width, string & res)
   str = &str[t];
 
   while (*str != '\n' && *str != '\0') {
-    if (*str == '^') {
-      ++str;
+    if (iscmd(*str)) {
       if (parse_cmd(str, width, res))
         return RET_FAIL;
     } else {
@@ -176,7 +193,7 @@ int parse_new_text(const char *& str, string & id, size_t & width, string & res)
 
 int parse_text(const char *& str, size_t & width, string & res) {
   const char * begin = str;
-  while (*str != '^' && *str != '\n') { ++str; }
+  while (istext(*++str)) ;
   res += string(begin, str);
   width += CHAR_WIDTH * (str - begin);
   return RET_SUCCESS;
@@ -185,30 +202,50 @@ int parse_text(const char *& str, size_t & width, string & res) {
 
 typedef enum {
   CMD_IMG = 0,
-  CMD_HASH,
-  CMD_PIPE,
   CMD_LAST
 } cmd_e;
 
 static string CMD_WORDS[CMD_LAST] = {
   "img",
-  "#",
-  "|"
 };
 
 static int (*CMD_FCNS[CMD_LAST])(const char *&, size_t&, string&) {
   &parse_img,
-  &parse_hash,
-  &parse_pipe
 };
 
 /*
  * Commands:
  *  ^img(...)
- *  ^#(...)
- *  ^|(...)
+ *  #
+ *  |
  */
 int parse_cmd(const char *& str, size_t & width, string & res) {
+  char ch = *str++;
+  switch (ch) {
+    case '^':
+      return parse_long_cmd(str, width, res);
+      break;
+    case '#':
+      return parse_hash(str, width, res);
+      break;
+    case '|':
+      return parse_pipe(str, width, res);
+      break;
+    default:
+      cerr << "Unkown command char: '" << ch << "'.\n";
+      return RET_FAIL;
+      break;
+  }
+  return RET_SUCCESS;
+}
+
+/*
+ * Commands:
+ *  ^img(...)
+ *  #
+ *  |
+ */
+int parse_long_cmd(const char *& str, size_t & width, string & res) {
   const char * begin = str;
   while (*++str != '(') ;
   string scmd(begin, str);
@@ -222,10 +259,7 @@ int parse_cmd(const char *& str, size_t & width, string & res) {
     return RET_FAIL;
   }
 
-  if (CMD_FCNS[cmd](str, width, res))
-    return RET_FAIL;
-
-  return RET_SUCCESS;
+  return CMD_FCNS[cmd](str, width, res);
 }
 
 /*
@@ -253,30 +287,33 @@ int parse_img(const char *& str, size_t & width, string & res) {
   return RET_SUCCESS;
 }
 
+/*
+ * simple commands
+ */
 int parse_hash(const char *& str, size_t & width, string & res) {
-  ++str;
-  if (*str != ')') {
-    cerr << "Unkown argument(s) to ^#.\n";
-    return RET_FAIL;
+  if (*str == '#') {
+    /* doubled, print a hash */
+    ++str;
+    res += "#";
+    width += CHAR_WIDTH;
+  } else {
+    res += SPACE;
+    width += SPACE_WIDTH;
   }
-  ++str;
-  
-  res += SPACE;
-  width += SPACE_WIDTH;
 
   return RET_SUCCESS;
 }
 
 int parse_pipe(const char *& str, size_t & width, string & res) {
-  ++str;
-  if (*str != ')') {
-    cerr << "Unkown argument(s) to ^|.\n";
-    return RET_FAIL;
+  if (*str == '|') {
+    /* doubled, print a hash */
+    ++str;
+    res += "|";
+    width += CHAR_WIDTH;
+  } else {
+    res += SEPARATOR;
+    width += SEPARATOR_WIDTH;
   }
-  ++str;
-
-  res += SEPARATOR;
-  width += SEPARATOR_WIDTH;
 
   return RET_SUCCESS;
 }
