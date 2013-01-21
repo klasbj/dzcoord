@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include <stdexcept>
-#include <map>
+#include <set>
 #include "area.h"
 #include "parser.h"
 
@@ -15,7 +15,7 @@ const size_t LINE_BUF_SIZE = 1024*1024;
 
 char line_buf[LINE_BUF_SIZE];
 
-unordered_map<string, area_t> areas;
+extern multiset<area_t*, area_t_lt> areas;
 
 void print() {
   int left_pos = 0;
@@ -24,20 +24,20 @@ void print() {
   string left = "", right = "";
 
   for (auto it = areas.begin(); it != areas.end(); ++it) {
-    if (it->second.fl == FLOAT_LEFT) {
-      left_pos += it->second.width;
-      left += it->second.prints;
-      if (it->second.width > 0) {
+    if ((*it)->fl == FLOAT_LEFT) {
+      left_pos += (*it)->width;
+      left += (*it)->prints;
+      if ((*it)->width > 0) {
         left += SEPARATOR;
         left_pos += SEPARATOR_WIDTH;
       }
-    } else if (it->second.fl == FLOAT_RIGHT) {
-      if (it->second.width > 0) {
+    } else if ((*it)->fl == FLOAT_RIGHT) {
+      if ((*it)->width > 0) {
         right += SEPARATOR;
         right_pos -= SEPARATOR_WIDTH;
       }
-      right_pos -= it->second.width;
-      right += it->second.prints;
+      right_pos -= (*it)->width;
+      right += (*it)->prints;
     }
 
   }

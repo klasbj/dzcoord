@@ -4,12 +4,14 @@
 #include <cctype>
 #include <stdexcept>
 #include <unordered_map>
+#include <set>
 #include "parser.h"
 #include "area.h"
 
 using namespace std;
 
-extern unordered_map<string, area_t> areas;
+static unordered_map<string, area_t> area_map;
+multiset<area_t*, area_t_lt> areas;
 
 const int
   RET_SUCCESS   = 0,
@@ -88,7 +90,8 @@ int parse(const char * str) {
       cerr << "Unable to parse add_area.\n";
       return RET_FAIL;
     } else {
-      areas[new_area.id] = new_area;
+      area_map[new_area.id] = new_area;
+      areas.insert(&area_map[new_area.id]);
     }
   } else if (l == LINE_NEW_TEXT) {
     size_t width = 0;
@@ -99,8 +102,8 @@ int parse(const char * str) {
       cerr << "Unable to parse text.\n";
       return RET_FAIL;
     } else {
-      auto it = areas.find(id);
-      if (it != areas.end()) {
+      auto it = area_map.find(id);
+      if (it != area_map.end()) {
         it->second.width = width;
         it->second.prints = res;
       } else {

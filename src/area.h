@@ -25,9 +25,9 @@ class area_t {
   area_t() : id(""),weight(0),text(""),prints(""),fl(FLOAT_LAST),width(0) { }
 };
 
-bool operator<(const area_t & a, const area_t & b);
-
-//map<size_t,area_t> areas;
-extern std::unordered_map<std::string,area_t> areas;
+class area_t_lt {
+  public:
+    bool operator()(const area_t * l, const area_t * r);
+};
 
 #endif
