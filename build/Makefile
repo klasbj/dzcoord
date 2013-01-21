@@ -23,5 +23,8 @@ $(BINDIR):
 $(BIN): $(OBJS) | $(BINDIR)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-.o.cpp:
-	$(CXX) $(CXXFLAGS) -c -o $@ $<
+.cpp.o:
+	$(CXX) $(CXXFLAGS) -c $<
+
+clean:
+	rm -f $(OBJS) $(BIN)
