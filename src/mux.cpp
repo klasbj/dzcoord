@@ -8,6 +8,9 @@
 
 using namespace std;
 
+extern const size_t SEPARATOR_WIDTH;
+extern const string SEPARATOR;
+
 const size_t LINE_BUF_SIZE = 1024*1024;
 
 char line_buf[LINE_BUF_SIZE];
@@ -24,7 +27,15 @@ void print() {
     if (it->second.fl == FLOAT_LEFT) {
       left_pos += it->second.width;
       left += it->second.prints;
+      if (it->second.width > 0) {
+        left += SEPARATOR;
+        left_pos += SEPARATOR_WIDTH;
+      }
     } else if (it->second.fl == FLOAT_RIGHT) {
+      if (it->second.width > 0) {
+        right += SEPARATOR;
+        right_pos -= SEPARATOR_WIDTH;
+      }
       right_pos -= it->second.width;
       right += it->second.prints;
     }

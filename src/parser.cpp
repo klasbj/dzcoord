@@ -27,8 +27,8 @@ static const size_t SCREEN_WIDTH = 1366;
 static const size_t SPACE_WIDTH = 4;
 static const string SPACE = _SPACE_;
 
-static const size_t SEPARATOR_WIDTH = (CHAR_WIDTH+2*SPACE_WIDTH);
-static const string SEPARATOR = _SPACE_ _FGFOCUS_ _SEP_CHAR_ _FGNORMAL_ _SPACE_;
+extern const size_t SEPARATOR_WIDTH = (CHAR_WIDTH+2*SPACE_WIDTH);
+extern const string SEPARATOR = _SPACE_ _FGFOCUS_ _SEP_CHAR_ _FGNORMAL_ _SPACE_;
 
 typedef enum {
   LINE_ADD_AREA = 0,
