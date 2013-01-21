@@ -21,6 +21,7 @@ const int
 static const size_t CHAR_WIDTH = 6;
 static const size_t SCREEN_WIDTH = 1366;
 
+#define _FGLOW_      "^fg(#2e3436)"
 #define _FGNORMAL_  "^fg(#e0ffff)"
 #define _FGFOCUS_   "^fg(#1994d1)"
 #define _SPACE_     "^p(4)"
@@ -205,20 +206,29 @@ int parse_text(const char *& str, size_t & width, string & res) {
 
 typedef enum {
   CMD_IMG = 0,
+  CMD_FOCUS,
+  CMD_NORM,
+  CMD_LOW,
   CMD_LAST
 } cmd_e;
 
 static string CMD_WORDS[CMD_LAST] = {
   "img",
+  "focus",
+  "norm",
+  "low",
 };
 
 static int (*CMD_FCNS[CMD_LAST])(const char *&, size_t&, string&) {
   &parse_img,
+  &parse_focus,
+  &parse_norm,
+  &parse_low,
 };
 
 /*
  * Commands:
- *  ^img(...)
+ *  ^xxx(...)
  *  #
  *  |
  */
@@ -245,8 +255,9 @@ int parse_cmd(const char *& str, size_t & width, string & res) {
 /*
  * Commands:
  *  ^img(...)
- *  #
- *  |
+ *  ^focus(...)
+ *  ^norm(...)
+ *  ^low(...)
  */
 int parse_long_cmd(const char *& str, size_t & width, string & res) {
   const char * begin = str;
@@ -318,5 +329,35 @@ int parse_pipe(const char *& str, size_t & width, string & res) {
     width += SEPARATOR_WIDTH;
   }
 
+  return RET_SUCCESS;
+}
+
+int parse_focus(const char *& str, size_t & width, std::string & res) {
+  if (*++str != ')') {
+    cerr << "Unkown argument to ^focus()." << endl;
+    return RET_FAIL;
+  }
+  ++str;
+  res += _FGFOCUS_;
+  return RET_SUCCESS;
+}
+
+int parse_norm(const char *& str, size_t & width, std::string & res) {
+  if (*++str != ')') {
+    cerr << "Unkown argument to ^norm()." << endl;
+    return RET_FAIL;
+  }
+  ++str;
+  res += _FGNORMAL_;
+  return RET_SUCCESS;
+}
+
+int parse_low(const char *& str, size_t & width, std::string & res) {
+  if (*++str != ')') {
+    cerr << "Unkown argument to ^low()." << endl;
+    return RET_FAIL;
+  }
+  ++str;
+  res += _FGLOW_;
   return RET_SUCCESS;
 }
