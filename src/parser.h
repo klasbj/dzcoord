@@ -14,6 +14,7 @@ int parse_new_text(const char *& str, std::string & id, size_t & width, std::str
 int parse_text(const char *& str, size_t & width, std::string & res);
 int parse_cmd(const char *& str, size_t & width, std::string & res);
 int parse_long_cmd(const char *& str, size_t & width, std::string & res);
+int parse_unkown_command(const char *& str, size_t & width, std::string & res);
 int parse_img(const char *& str, size_t & width, std::string & res);
 int parse_focus(const char *& str, size_t & width, std::string & res);
 int parse_norm(const char *& str, size_t & width, std::string & res);

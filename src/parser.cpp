@@ -213,17 +213,18 @@ typedef enum {
 } cmd_e;
 
 static string CMD_WORDS[CMD_LAST] = {
-  "img",
+  "i",
   "focus",
   "norm",
   "low",
 };
 
-static int (*CMD_FCNS[CMD_LAST])(const char *&, size_t&, string&) {
+static int (*CMD_FCNS[CMD_LAST + 1])(const char *&, size_t&, string&) {
   &parse_img,
   &parse_focus,
   &parse_norm,
   &parse_low,
+  &parse_unkown_command,
 };
 
 /*
@@ -234,6 +235,14 @@ static int (*CMD_FCNS[CMD_LAST])(const char *&, size_t&, string&) {
  */
 int parse_cmd(const char *& str, size_t & width, string & res) {
   char ch = *str++;
+  if (*str == ch) {
+    /* doubled, print the character */
+    ++str;
+    res += ch;
+    width += CHAR_WIDTH;
+
+    return RET_SUCCESS;
+  }
   switch (ch) {
     case '^':
       return parse_long_cmd(str, width, res);
@@ -254,7 +263,7 @@ int parse_cmd(const char *& str, size_t & width, string & res) {
 
 /*
  * Commands:
- *  ^img(...)
+ *  ^i(...)
  *  ^focus(...)
  *  ^norm(...)
  *  ^low(...)
@@ -268,23 +277,18 @@ int parse_long_cmd(const char *& str, size_t & width, string & res) {
     if (scmd == CMD_WORDS[i])
       cmd = (cmd_e) i;
 
-  if (cmd == CMD_LAST) {
-    cerr << "Unkown command: '" << scmd << "'.\n";
-    return RET_FAIL;
-  }
-
   return CMD_FCNS[cmd](str, width, res);
 }
 
 /*
- * ^img(filename,width)
+ * ^i(filename,width)
  */
 int parse_img(const char *& str, size_t & width, string & res) {
   /* get filename */
   const char * begin = ++str;
   while (*++str != ',') ;
   string file(begin, str);
-  
+
   /* get width */
   begin = ++str;
   while (*++str != ')') ;
@@ -302,32 +306,35 @@ int parse_img(const char *& str, size_t & width, string & res) {
 }
 
 /*
+ * ^i(filename,width)
+ */
+int parse_unkown_command(const char *& str, size_t & width, string & res) {
+  /* find the whole argument */
+  const char * begin = str;
+  while (*--begin != '^') ;
+  while (*++str != ')') ;
+  string cmd(begin, str);
+
+  /* add the command */
+  /* unkown commands have zero width */
+  res += cmd;
+
+  return RET_SUCCESS;
+}
+
+/*
  * simple commands
  */
 int parse_hash(const char *& str, size_t & width, string & res) {
-  if (*str == '#') {
-    /* doubled, print a hash */
-    ++str;
-    res += "#";
-    width += CHAR_WIDTH;
-  } else {
-    res += SPACE;
-    width += SPACE_WIDTH;
-  }
+  res += SPACE;
+  width += SPACE_WIDTH;
 
   return RET_SUCCESS;
 }
 
 int parse_pipe(const char *& str, size_t & width, string & res) {
-  if (*str == '|') {
-    /* doubled, print a hash */
-    ++str;
-    res += "|";
-    width += CHAR_WIDTH;
-  } else {
-    res += SEPARATOR;
-    width += SEPARATOR_WIDTH;
-  }
+  res += SEPARATOR;
+  width += SEPARATOR_WIDTH;
 
   return RET_SUCCESS;
 }
