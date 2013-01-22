@@ -35,12 +35,14 @@ extern const string SEPARATOR = _SPACE_ _FGFOCUS_ _SEP_CHAR_ _FGNORMAL_ _SPACE_;
 
 typedef enum {
   LINE_ADD_AREA = 0,
+  LINE_RM_AREA,
   LINE_NEW_TEXT,
   LINE_LAST 
 } line_t;
 
 static string LINE_WORDS[LINE_LAST] = {
   "add_area",
+  "rm_area",
   "text"
 };
 
@@ -91,8 +93,26 @@ int parse(const char * str) {
       cerr << "Unable to parse add_area.\n";
       return RET_FAIL;
     } else {
-      area_map[new_area.id] = new_area;
-      areas.insert(&area_map[new_area.id]);
+      auto it = area_map.find(new_area.id);
+      if (it == area_map.end()) {
+        area_map[new_area.id] = new_area;
+        areas.insert(&area_map[new_area.id]);
+      } else {
+        it->second.weight = new_area.weight;
+        it->second.fl = new_area.fl;
+      }
+    }
+  } else if (l == LINE_RM_AREA) {
+    string id;
+    if (parse_rm_area(s, id)) {
+      cerr << "Unable to parse rm_area.\n";
+      return RET_FAIL;
+    }
+    auto it = area_map.find(id);
+    if (it != area_map.end()) {
+      area_t * a = &it->second;
+      areas.erase(a);
+      area_map.erase(id);
     }
   } else if (l == LINE_NEW_TEXT) {
     size_t width = 0;
@@ -167,6 +187,17 @@ int parse_add_area(const char *& str, area_t & a) {
   if (a.fl == FLOAT_LEFT || a.fl == FLOAT_CENTER) {
     a.weight = -a.weight;
   }
+
+  return RET_SUCCESS;
+}
+
+int parse_rm_area(const char *& str, string & id) {
+  size_t f = 0, t = 0;
+  if (str[t] == '\0' || str[t] == '\n') return RET_FAIL;
+
+  /* find the ID */
+  while (!isspace(str[t])) { ++t; }
+  id = string(&str[f], &str[t]);
 
   return RET_SUCCESS;
 }
@@ -313,6 +344,7 @@ int parse_unkown_command(const char *& str, size_t & width, string & res) {
   const char * begin = str;
   while (*--begin != '^') ;
   while (*++str != ')') ;
+  ++str;
   string cmd(begin, str);
 
   /* add the command */
