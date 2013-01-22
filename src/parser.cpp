@@ -164,7 +164,7 @@ int parse_add_area(const char *& str, area_t & a) {
     return RET_FAIL;
   }
 
-  if (a.fl == FLOAT_LEFT) {
+  if (a.fl == FLOAT_LEFT || a.fl == FLOAT_CENTER) {
     a.weight = -a.weight;
   }
 

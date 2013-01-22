@@ -18,6 +18,7 @@ char line_buf[LINE_BUF_SIZE];
 extern multiset<area_t*, area_t_lt> areas;
 
 void print() {
+  bool center_added = false;
   int left_pos = 0;
   int right_pos = 1366;
 
@@ -31,6 +32,19 @@ void print() {
         left += SEPARATOR;
         left_pos += SEPARATOR_WIDTH;
       }
+    } else if ((*it)->fl == FLOAT_CENTER) {
+      if (center_added) {
+        if ((*it)->width > 0) {
+          left += SEPARATOR;
+          left_pos += SEPARATOR_WIDTH;
+        }
+      } else {
+        center_added = (*it)->width > 0;
+      }
+
+      left_pos += (*it)->width;
+      left += (*it)->prints;
+
     } else if ((*it)->fl == FLOAT_RIGHT) {
       if ((*it)->width > 0) {
         right += SEPARATOR;
