@@ -5,11 +5,9 @@
 #include <set>
 #include "area.h"
 #include "parser.h"
+#include "options.h"
 
 using namespace std;
-
-extern const size_t SEPARATOR_WIDTH;
-extern const string SEPARATOR;
 
 const size_t LINE_BUF_SIZE = 1024*1024;
 
@@ -20,7 +18,7 @@ extern multiset<area_t*, area_t_lt> areas;
 void print() {
   bool center_added = false;
   int left_pos = 0;
-  int right_pos = 1366;
+  int right_pos = SCREEN_WIDTH;
 
   string left = "", right = "";
 
@@ -57,7 +55,7 @@ void print() {
   }
 
   cout << left;
-  cout << "^pa(" << right_pos << ")^fg(black)^r(" << 1366-right_pos <<
+  cout << "^pa(" << right_pos << ")^fg(black)^r(" << SCREEN_WIDTH-right_pos <<
     "x15)^fg(#e0ffff)^pa(" << right_pos << ")";
   cout << right;
 

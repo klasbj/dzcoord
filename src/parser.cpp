@@ -7,31 +7,16 @@
 #include <set>
 #include "parser.h"
 #include "area.h"
+#include "options.h"
 
 using namespace std;
 
 static unordered_map<string, area_t> area_map;
 multiset<area_t*, area_t_lt> areas;
 
-const int
+static const int
   RET_SUCCESS   = 0,
   RET_FAIL      = 1;
-
-
-static const size_t CHAR_WIDTH = 6;
-static const size_t SCREEN_WIDTH = 1366;
-
-#define _FGLOW_      "^fg(#2e3436)"
-#define _FGNORMAL_  "^fg(#e0ffff)"
-#define _FGFOCUS_   "^fg(#1994d1)"
-#define _SPACE_     "^p(4)"
-#define _SEP_CHAR_  "|"
-
-static const size_t SPACE_WIDTH = 4;
-static const string SPACE = _SPACE_;
-
-extern const size_t SEPARATOR_WIDTH = (CHAR_WIDTH+2*SPACE_WIDTH);
-extern const string SEPARATOR = _SPACE_ _FGFOCUS_ _SEP_CHAR_ _FGNORMAL_ _SPACE_;
 
 typedef enum {
   LINE_ADD_AREA = 0,
@@ -377,7 +362,7 @@ int parse_focus(const char *& str, size_t & width, std::string & res) {
     return RET_FAIL;
   }
   ++str;
-  res += _FGFOCUS_;
+  res += FG_FOCUS;
   return RET_SUCCESS;
 }
 
@@ -387,7 +372,7 @@ int parse_norm(const char *& str, size_t & width, std::string & res) {
     return RET_FAIL;
   }
   ++str;
-  res += _FGNORMAL_;
+  res += FG_NORMAL;
   return RET_SUCCESS;
 }
 
@@ -397,6 +382,6 @@ int parse_low(const char *& str, size_t & width, std::string & res) {
     return RET_FAIL;
   }
   ++str;
-  res += _FGLOW_;
+  res += FG_LOW;
   return RET_SUCCESS;
 }
