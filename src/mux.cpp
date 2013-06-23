@@ -15,10 +15,12 @@ char line_buf[LINE_BUF_SIZE];
 
 extern multiset<area_t*, area_t_lt> areas;
 
-void print() {
+screen_t screen;
+
+void print(size_t width) {
   bool center_added = false;
   int left_pos = 0;
-  int right_pos = SCREEN_WIDTH;
+  int right_pos = width;
 
   string left = "", right = "";
 
@@ -55,7 +57,7 @@ void print() {
   }
 
   cout << left;
-  cout << "^pa(" << right_pos << ")^fg(black)^r(" << SCREEN_WIDTH-right_pos <<
+  cout << "^pa(" << right_pos << ")^fg(black)^r(" << width-right_pos <<
     "x15)^fg(#e0ffff)^pa(" << right_pos << ")";
   cout << right;
 
@@ -64,11 +66,20 @@ void print() {
 }
 
 int main() {
+  screen.id = 0;
+  screen.width = SCREEN_WIDTH;
+  screen.dirty = false;
+
   while (fgets(line_buf, LINE_BUF_SIZE, stdin)) {
     if (parse(line_buf)) {
       cerr << "Unable to parse line.\n";
     }
+
+    if (screen.dirty) {
+      screen.dirty = false;
+      cout << "^screen()" << endl;
+    }
     
-    print();
+    print(screen.width);
   }
 }

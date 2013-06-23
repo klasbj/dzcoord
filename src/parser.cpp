@@ -7,9 +7,12 @@
 #include <set>
 #include "parser.h"
 #include "area.h"
+#include "screen.h"
 #include "options.h"
 
 using namespace std;
+
+extern screen_t screen;
 
 static unordered_map<string, area_t> area_map;
 multiset<area_t*, area_t_lt> areas;
@@ -19,16 +22,18 @@ static const int
   RET_FAIL      = 1;
 
 typedef enum {
-  LINE_ADD_AREA = 0,
+  LINE_NEW_TEXT = 0,
+  LINE_ADD_AREA,
   LINE_RM_AREA,
-  LINE_NEW_TEXT,
+  LINE_SCREEN,
   LINE_LAST 
 } line_t;
 
 static string LINE_WORDS[LINE_LAST] = {
+  "text",
   "add_area",
   "rm_area",
-  "text"
+  "screen"
 };
 
 static inline bool iscmd(char ch) {
@@ -70,8 +75,36 @@ int parse(const char * str) {
   while (isspace(str[t])) { ++t; }
 
   s = &str[t];
+  if (l == LINE_NEW_TEXT) {
+    size_t width = 0;
+    string id;
+    string res;
 
-  if (l == LINE_ADD_AREA) {
+    if (parse_new_text(s, id, width, res)) {
+      cerr << "Unable to parse text.\n";
+      return RET_FAIL;
+    } else {
+      auto it = area_map.find(id);
+      if (it != area_map.end()) {
+        it->second.width = width;
+        it->second.prints = res;
+      } else {
+        cerr << "No such area: '" << id << "'.\n";
+        return RET_FAIL;
+      }
+    }
+  } else if (l == LINE_SCREEN) {
+    screen_t sc;
+    if (parse_screen(s, sc)) {
+      cerr << "Unable to parse screen.\n";
+      return RET_FAIL;
+    } else {
+      if (sc.id == screen.id) {
+        screen = sc;
+        screen.dirty = true;
+      }
+    }
+  } else if (l == LINE_ADD_AREA) {
     area_t new_area;
 
     if (parse_add_area(s, new_area)) {
@@ -99,24 +132,6 @@ int parse(const char * str) {
       areas.erase(a);
       area_map.erase(id);
     }
-  } else if (l == LINE_NEW_TEXT) {
-    size_t width = 0;
-    string id;
-    string res;
-
-    if (parse_new_text(s, id, width, res)) {
-      cerr << "Unable to parse text.\n";
-      return RET_FAIL;
-    } else {
-      auto it = area_map.find(id);
-      if (it != area_map.end()) {
-        it->second.width = width;
-        it->second.prints = res;
-      } else {
-        cerr << "No such area: '" << id << "'.\n";
-        return RET_FAIL;
-      }
-    }
   } else {
     cerr << "Unknown line type: '" << word << "'.\n";
     return RET_FAIL;
@@ -125,6 +140,42 @@ int parse(const char * str) {
   return RET_SUCCESS;
 }
 
+/*
+ * screen id x y width height
+ */
+int parse_screen(const char *& str, screen_t & a) {
+  char * ss = strdup(str);
+  char * tok;
+
+  /* id */
+  tok = strtok((char*)ss, " ");
+  if (tok == NULL) return RET_FAIL;
+  a.id = atoi(tok);
+
+  /* x */
+  tok = strtok(NULL, " ");
+  if (tok == NULL) return RET_FAIL;
+  a.x = atoi(tok);
+
+  /* y */
+  tok = strtok(NULL, " ");
+  if (tok == NULL) return RET_FAIL;
+  a.y = atoi(tok);
+
+  /* w */
+  tok = strtok(NULL, " ");
+  if (tok == NULL) return RET_FAIL;
+  a.width = atoi(tok);
+
+  /* h */
+  tok = strtok(NULL, " \n");
+  if (tok == NULL) return RET_FAIL;
+  a.height = atoi(tok);
+
+  free(ss);
+
+  return RET_SUCCESS;
+}
 /*
  * add_area id weight LEFT|RIGHT
  */
@@ -286,7 +337,9 @@ int parse_cmd(const char *& str, size_t & width, string & res) {
  */
 int parse_long_cmd(const char *& str, size_t & width, string & res) {
   const char * begin = str;
-  while (*++str != '(') ;
+  while (*++str != '(' && *str != '\0') ;
+  if (*str == '\0')
+    return RET_FAIL;
   string scmd(begin, str);
   cmd_e cmd = CMD_LAST;
   for (int i = 0; i < (int)CMD_LAST; ++i)
@@ -302,12 +355,16 @@ int parse_long_cmd(const char *& str, size_t & width, string & res) {
 int parse_img(const char *& str, size_t & width, string & res) {
   /* get filename */
   const char * begin = ++str;
-  while (*++str != ',') ;
+  while (*++str != ',' && *str != '\0') ;
+  if (*str == '\0')
+    return RET_FAIL;
   string file(begin, str);
 
   /* get width */
   begin = ++str;
-  while (*++str != ')') ;
+  while (*++str != ')' && *str != '\0') ;
+  if (*str == '\0')
+    return RET_FAIL;
   string swidth(begin, str);
   try {
     width += stoul(swidth);
@@ -328,7 +385,9 @@ int parse_unkown_command(const char *& str, size_t & width, string & res) {
   /* find the whole argument */
   const char * begin = str;
   while (*--begin != '^') ;
-  while (*++str != ')') ;
+  while (*++str != ')' && *str != '\0') ;
+  if (*str == '\0')
+    return RET_FAIL;
   ++str;
   string cmd(begin, str);
 
