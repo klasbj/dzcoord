@@ -1,4 +1,5 @@
 #include "dzen.h"
+#include "options.h"
 
 #include <cstdio>
 #include <string>
@@ -32,10 +33,9 @@ void dzen_t::start_dzen() {
   if (this->pipe != NULL)
     return;
 
-  sprintf(cmdbuf, "/usr/bin/dzen2 -xs \"%d\" -y \"%d\" -h \"%d\" -fg \"%s\" -bg \"%s\" -ta l -fn '%s' -e 'onstart=lower'",
-      this->screen + 1, this->position == DOCK_TOP ? 0 : -15, 15, "#e0ffff", "black",
-      "-*-terminus-*-*-*-*-12-*-*-*-*-*-*-");
-  //fprintf(stderr, "run: %s\n", cmdbuf);
+  sprintf(cmdbuf, "dzen2 -xs \"%d\" -y \"%d\" -h \"%d\" -fg \"%s\" -bg \"%s\" -ta l -fn '%s' -e 'onstart=lower'",
+      this->screen + 1, this->position == DOCK_TOP ? 0 : -(int)LINE_HEIGHT, (int)LINE_HEIGHT, COLOR_NORMAL.c_str(), COLOR_BG.c_str(),
+      FONT.c_str());
   this->pipe = popen(cmdbuf, "w");
   if (this->pipe == NULL)
     perror("unable to open dzen");

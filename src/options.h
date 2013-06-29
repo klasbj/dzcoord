@@ -14,6 +14,9 @@
 #define _DEFAULT_CHAR_WIDTH_    6
 #define _DEFAULT_SPACE_WIDTH_   4
 
+#define _DEFAULT_LINE_HEIGHT_   30
+#define _DEFAULT_FONT_          "-*-terminus-*-*-*-*-12-*-*-*-*-*-*-"
+
 #define _DEFAULT_COLOR_LOW_    "#2e3436"
 #define _DEFAULT_COLOR_NORMAL_ "#e0ffff"
 #define _DEFAULT_COLOR_FOCUS_  "#1994d1"
@@ -29,6 +32,10 @@ extern size_t SCREEN_WIDTH;
 extern size_t CHAR_WIDTH;
 extern size_t SPACE_WIDTH;
 extern size_t SEPARATOR_WIDTH;
+
+extern size_t LINE_HEIGHT;
+
+extern std::string FONT;
 
 extern std::string SPACE;
 extern std::string SEPARATOR_CHARS;

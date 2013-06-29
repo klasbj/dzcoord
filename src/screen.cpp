@@ -87,27 +87,21 @@ void screen_t::bartext(const aset & d, std::string & left, std::string & right,
 void screen_t::update() {
   if (!this->screen_active) return;
 
-  if (show_top) {
-    std::string left, right;
-    size_t right_pos;
-    this->bartext(atop, left, right, right_pos);
-    if (this->dirty) {
-      this->top.start_dzen();
-      this->top.set_size(this->width, this->height);
-    }
-    this->top.write(left, right, right_pos);
+  std::string left, right;
+  size_t right_pos;
+  this->bartext(atop, left, right, right_pos);
+  if (this->dirty) {
+    this->top.start_dzen();
+    this->top.set_size(this->width, this->height);
   }
+  this->top.write(left, right, right_pos);
 
-  if (show_bottom) {
-    std::string left, right;
-    size_t right_pos;
-    this->bartext(abottom, left, right, right_pos);
-    if (this->dirty) {
-      this->bottom.start_dzen();
-      this->bottom.set_size(this->width, this->height);
-    }
-    this->bottom.write(left, right, right_pos);
+  this->bartext(abottom, left, right, right_pos);
+  if (this->dirty) {
+    this->bottom.start_dzen();
+    this->bottom.set_size(this->width, this->height);
   }
+  this->bottom.write(left, right, right_pos);
 
   this->dirty = false;
 }
