@@ -1,3 +1,4 @@
+#include "debug.h"
 #include "dzen.h"
 #include "options.h"
 
@@ -36,13 +37,17 @@ void dzen_t::start_dzen() {
   sprintf(cmdbuf, "dzen2 -xs \"%d\" -y \"%d\" -h \"%d\" -fg \"%s\" -bg \"%s\" -ta l -fn '%s' -e 'onstart=lower'",
       this->screen + 1, this->position == DOCK_TOP ? 0 : -(int)LINE_HEIGHT, (int)LINE_HEIGHT, COLOR_NORMAL.c_str(), COLOR_BG.c_str(),
       FONT.c_str());
+
+  debug_print("screen %d, %s: run '%s'", this->screen, dock_names[this->position].c_str(), cmdbuf);
   this->pipe = popen(cmdbuf, "w");
   if (this->pipe == NULL)
     perror("unable to open dzen");
 }
 void dzen_t::stop_dzen() {
-  if (this->pipe != NULL)
+  if (this->pipe != NULL) {
+    debug_print("screen %d, %s: stopping dzen", this->screen, dock_names[this->position].c_str());
     if (pclose(this->pipe))
       perror("unable to close dzen");
+  }
   this->pipe = NULL;
 }

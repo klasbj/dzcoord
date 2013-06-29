@@ -8,8 +8,6 @@
 #include <set>
 #include <vector>
 
-extern std::string dock_names[DOCK_LAST];
-
 class screen_t {
   private:
   typedef std::multiset<area_t*, area_t_lt> aset;
