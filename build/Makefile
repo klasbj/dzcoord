@@ -4,7 +4,7 @@ CXXFLAGS := -Wall -g -std=c++11
 
 VPATH+=$(CURDIR)/../src 
 
-OBJS := parser.o mux.o area.o options.o
+OBJS := parser.o mux.o area.o options.o dzen.o screen.o
 
 BINDIR := $(CURDIR)/../bin
 BIN := $(BINDIR)/dzcoord

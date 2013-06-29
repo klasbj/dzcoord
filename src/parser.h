@@ -11,7 +11,7 @@
 
 int parse(const char * str);
 int parse_screen(const char *& str, screen_t & s);
-int parse_add_area(const char *& str, area_t & a);
+int parse_add_area(const char *& str, int & screen, dock_position_t & dock, area_t & a);
 int parse_rm_area(const char *& str, std::string & id);
 int parse_new_text(const char *& str, std::string & id, size_t & width, std::string & res);
 int parse_text(const char *& str, size_t & width, std::string & res);

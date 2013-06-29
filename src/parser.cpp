@@ -12,10 +12,7 @@
 
 using namespace std;
 
-extern screen_t screen;
-
 static unordered_map<string, area_t> area_map;
-multiset<area_t*, area_t_lt> areas;
 
 static const int
   RET_SUCCESS   = 0,
@@ -99,25 +96,26 @@ int parse(const char * str) {
       cerr << "Unable to parse screen.\n";
       return RET_FAIL;
     } else {
-      if (sc.id == screen.id) {
-        screen = sc;
-        screen.dirty = true;
-      }
+      screens[sc.id].set_screen_size(sc);
     }
   } else if (l == LINE_ADD_AREA) {
+    int screen;
+    dock_position_t dock;
     area_t new_area;
 
-    if (parse_add_area(s, new_area)) {
+    if (parse_add_area(s, screen, dock, new_area)) {
       cerr << "Unable to parse add_area.\n";
       return RET_FAIL;
     } else {
       auto it = area_map.find(new_area.id);
       if (it == area_map.end()) {
         area_map[new_area.id] = new_area;
-        areas.insert(&area_map[new_area.id]);
+        screens[screen].add_area(&area_map[new_area.id], dock);
+//        areas.insert(&area_map[new_area.id]);
       } else {
         it->second.weight = new_area.weight;
         it->second.fl = new_area.fl;
+        /* move to different bar ? */
       }
     }
   } else if (l == LINE_RM_AREA) {
@@ -129,7 +127,7 @@ int parse(const char * str) {
     auto it = area_map.find(id);
     if (it != area_map.end()) {
       area_t * a = &it->second;
-      areas.erase(a);
+//      areas.erase(a);
       area_map.erase(id);
     }
   } else {
@@ -177,15 +175,48 @@ int parse_screen(const char *& str, screen_t & a) {
   return RET_SUCCESS;
 }
 /*
- * add_area id weight LEFT|RIGHT
+ * add_area id screen TOP|BOTTOM weight LEFT|RIGHT|CENTER
  */
-int parse_add_area(const char *& str, area_t & a) {
+int parse_add_area(const char *& str, int & screen, dock_position_t & dock, area_t & a) {
   size_t f = 0, t = 0;
   if (str[t] == '\0') return RET_FAIL;
 
   /* find the ID */
   while (!isspace(str[t])) { ++t; }
   a.id = string(&str[f], &str[t]);
+
+  /* advance past the next word */
+  while (isspace(str[t])) { ++t; }
+  f = t;
+  if (str[t] == '\0') return RET_FAIL;
+  while (!isspace(str[t])) { ++t; }
+
+  /* find the screen */
+  string sc(&str[f], &str[t]);
+  try {
+    screen = stoi(sc);
+  } catch (invalid_argument e) {
+    cerr << "Unable to parse screen: '" << sc << "'\n";
+    return RET_FAIL;
+  }
+
+  /* advance past the next word */
+  while (isspace(str[t])) { ++t; }
+  f = t;
+  if (str[t] == '\0') return RET_FAIL;
+  while (!isspace(str[t])) { ++t; }
+
+  /* find the dock position */
+  string d(&str[f], &str[t]);
+  dock = DOCK_LAST;
+  for (int i = 0; i < (int)DOCK_LAST; ++i)
+    if (d == dock_names[i])
+      dock = (dock_position_t) i;
+
+  if (dock == DOCK_LAST) {
+    cerr << "Unknown dock: '" << d << "'.\n";
+    return RET_FAIL;
+  }
 
   /* advance past the next word */
   while (isspace(str[t])) { ++t; }

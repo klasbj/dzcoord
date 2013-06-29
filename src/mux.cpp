@@ -6,8 +6,11 @@
 #include "area.h"
 #include "parser.h"
 #include "options.h"
+#include "dzen.h"
 
 using namespace std;
+
+#define MAX_SCREENS 5
 
 const size_t LINE_BUF_SIZE = 1024*1024;
 
@@ -16,70 +19,21 @@ char line_buf[LINE_BUF_SIZE];
 extern multiset<area_t*, area_t_lt> areas;
 
 screen_t screen;
-
-void print(size_t width) {
-  bool center_added = false;
-  int left_pos = 0;
-  int right_pos = width;
-
-  string left = "", right = "";
-
-  for (auto it = areas.begin(); it != areas.end(); ++it) {
-    if ((*it)->fl == FLOAT_LEFT) {
-      left_pos += (*it)->width;
-      left += (*it)->prints;
-      if ((*it)->width > 0) {
-        left += SEPARATOR;
-        left_pos += SEPARATOR_WIDTH;
-      }
-    } else if ((*it)->fl == FLOAT_CENTER) {
-      if (center_added) {
-        if ((*it)->width > 0) {
-          left += SEPARATOR;
-          left_pos += SEPARATOR_WIDTH;
-        }
-      } else {
-        center_added = (*it)->width > 0;
-      }
-
-      left_pos += (*it)->width;
-      left += (*it)->prints;
-
-    } else if ((*it)->fl == FLOAT_RIGHT) {
-      if ((*it)->width > 0) {
-        right += SEPARATOR;
-        right_pos -= SEPARATOR_WIDTH;
-      }
-      right_pos -= (*it)->width;
-      right += (*it)->prints;
-    }
-
-  }
-
-  cout << left;
-  cout << "^pa(" << right_pos << ")^fg(black)^r(" << width-right_pos <<
-    "x15)^fg(#e0ffff)^pa(" << right_pos << ")";
-  cout << right;
-
-  cout << endl;
-  cout.flush();
-}
+dzen_t dzen_right(1, DOCK_TOP);
 
 int main() {
-  screen.id = 0;
-  screen.width = SCREEN_WIDTH;
-  screen.dirty = false;
+  for (int i = 0; i < MAX_SCREENS; ++i)
+    screens.emplace_back(i);
+
+//  screens[0].set_screen_size(0,0,SCREEN_WIDTH, 100);
 
   while (fgets(line_buf, LINE_BUF_SIZE, stdin)) {
     if (parse(line_buf)) {
       cerr << "Unable to parse line.\n";
     }
-
-    if (screen.dirty) {
-      screen.dirty = false;
-      cout << "^screen()" << endl;
-    }
-    
-    print(screen.width);
+    for (int i = 0; i < MAX_SCREENS; ++i)
+      screens[i].update();
   }
+
+  return EXIT_SUCCESS;
 }
