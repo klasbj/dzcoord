@@ -14,7 +14,7 @@
 #define _DEFAULT_CHAR_WIDTH_    6
 #define _DEFAULT_SPACE_WIDTH_   4
 
-#define _DEFAULT_LINE_HEIGHT_   30
+#define _DEFAULT_LINE_HEIGHT_   15
 #define _DEFAULT_FONT_          "-*-terminus-*-*-*-*-12-*-*-*-*-*-*-"
 
 #define _DEFAULT_COLOR_LOW_    "#2e3436"
