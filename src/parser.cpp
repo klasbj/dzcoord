@@ -111,7 +111,6 @@ int parse(const char * str) {
       if (it == area_map.end()) {
         area_map[new_area.id] = new_area;
         screens[screen].add_area(&area_map[new_area.id], dock);
-//        areas.insert(&area_map[new_area.id]);
       } else {
         it->second.weight = new_area.weight;
         it->second.fl = new_area.fl;
@@ -126,8 +125,6 @@ int parse(const char * str) {
     }
     auto it = area_map.find(id);
     if (it != area_map.end()) {
-      area_t * a = &it->second;
-//      areas.erase(a);
       area_map.erase(id);
     }
   } else {
