@@ -1,0 +1,47 @@
+dzcoord - the dzen2 coordinator
+===============================
+
+dzcoord is the dzen2 coordinator. It controls dzen bars and content for all screens.
+
+
+Control
+-------
+
+dzcoord reads commands on stdin, and outputs data in dzen2 instances. 
+
+The following commands are available:
+
+screen id x y w h
+  Information on screen dimension, all arguments are expected to be integers.
+
+add_area area_name screen_id BOTTOM|TOP weight LEFT|CENTER|RIGHT
+  Adds an area to the display in the specified bar (screen_id, TOP/BOTTOM).
+  It floats to the LEFT or RIGHT as far as the weight allows it to. I can't
+  remember what happens in case more than one window is specified as CENTER,
+  so lets say it is undefined behavior.
+
+rm_area area_name
+  Remove the area with the specified name.
+
+text area_name output
+  Change the output in the specified area. The output format accepts most
+  dzen arguments as usual. The one exception of the dzen commands is the ^i()
+  command. In addition to the image path, a second argument containing the
+  width of the image is needed.
+  The format is also extended with some helpers for setting font color:
+    ^focus()
+    ^norm()
+    ^low()
+  which sets colors configured in the options.h file.
+  There are also some special characters:
+    # - insert padding (configurable as SPACE in options.h)
+    | - insert a separator (configurable as SEPARATOR in options.h)
+  Special characters can be escaped by doubling them: ##, ||, ^^.
+
+Options
+-------
+
+Options are configured in the options.h header file.
+
+Currently, only monospace fonts are supported by the program. The character
+width must be specified in the options.h file for the program to work.
